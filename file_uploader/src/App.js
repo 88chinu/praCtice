@@ -19,3 +19,28 @@ const storage = multer.diskStorage({
     cb(null, fileName);
   },
 });
+
+const upload = multer({ storage });
+
+app.use('/uploads', express.static(path.join(__dirname, 'filestorage')));
+
+app.get('/', (req, res) => {
+  res.render('index')
+});
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    res.redirect('/')
+});
+
+app.delete('/delete/:fileName', (req, res) => {
+  const fileName = req.params.fileName;
+  const filePath = path.join(__dirname, 'filestorage', fileName);
+
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+    res.send(`File "${fileName}" has been deleted.`);
+  } else {
+    res.status(404).send(`File "${fileName}" not found.`);
+  }
+});
+
